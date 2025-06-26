@@ -28,8 +28,7 @@ bool repeating_timer_callback(struct repeating_timer *t)
 {float sample = ADC_sample(); // get sample and put it in a variable
     sample = sample/4096.0;
     sample -=0.5;
-    
-    
+   sample = Tremelo(sample,4);
     sample+=0.5;
     sample = sample *4096.0;
     
@@ -54,7 +53,7 @@ void main(){
 
 
     struct repeating_timer timer;
-    add_repeating_timer_us(12, repeating_timer_callback,NULL,&timer);
+    add_repeating_timer_us(23, repeating_timer_callback,NULL,&timer);
 
 
 

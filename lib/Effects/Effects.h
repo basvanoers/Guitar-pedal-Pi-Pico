@@ -17,4 +17,7 @@ float Gain(float sample,float gain);
 float Delay(float sample,float tijd);
 float LFO(float freq,float amp);
 float Tremelo(float sample, float freq);
+void delay_line_add(float sample);
+float delay_line_get(float sample);
+float Flanger(float sample, float freq);
 

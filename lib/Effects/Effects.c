@@ -131,4 +131,33 @@ float Tremelo(float sample, float freq)
     return sample*LFO(freq,1);
 }
 
+float Delay_line_buffer[48000]={0};
+int SAMPLES =0;
+void delay_line_add(float sample)
+{
+Delay_line_buffer[SAMPLES] = sample;
+SAMPLES++;
+if (SAMPLES >=48000)
+{
+    SAMPLES = 0;
+}
+
+}
+float delay_line_get(float sample)
+{
+    float index = SAMPLES-sample;
+    if (index<0)
+    {
+        index =0;
+    }
+    return Delay_line_buffer[(int)(SAMPLES-sample)];
+}
+
+float Flanger(float sample, float freq)
+{
+    delay_line_add(sample);
+float Output = sample + delay_line_get(LFO(freq,480));
+
+    return Output;
+}
 
