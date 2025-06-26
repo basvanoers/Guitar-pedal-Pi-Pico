@@ -23,34 +23,45 @@
 
 
 
-
-
-
-
-void main(){
-
-
-    
-    stdio_init_all();
-    ADC_init(0,96);
-    RGB_led_init(13,10,15);
-    effect_init(0);
-
-
-
-
-
- 
-while (1) {
-    
-    
-    float sample = ADC_sample(); // get sample and put it in a variable
+int led_value =0;
+bool repeating_timer_callback(struct repeating_timer *t)
+{float sample = ADC_sample(); // get sample and put it in a variable
     sample = sample/4096.0;
     sample -=0.5;
     
     sample+=0.5;
     sample = sample *4096.0;
     output(sample,0);
+    
+    return true;
+
+}
+
+
+
+void main(){
+
+
+   
+    stdio_init_all();
+    ADC_init(0,96);
+    //RGB_led_init(13,10,15);
+    effect_init(0);
+
+ 
+
+
+    struct repeating_timer timer;
+    add_repeating_timer_us(-1, repeating_timer_callback,NULL,&timer);
+
+
+
+ 
+while (1) {
+
+    
+    tight_loop_contents();    
+  
 }
 }
 
