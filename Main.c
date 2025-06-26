@@ -29,8 +29,7 @@ bool repeating_timer_callback(struct repeating_timer *t)
     sample = sample/4096.0;
     sample -=0.5;
     
-    //sample =Gain(sample,3);
-    sample =Delay(sample,1);
+    
     sample+=0.5;
     sample = sample *4096.0;
     
