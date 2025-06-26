@@ -23,14 +23,17 @@
 
 
 
-int led_value =0;
+
 bool repeating_timer_callback(struct repeating_timer *t)
 {float sample = ADC_sample(); // get sample and put it in a variable
     sample = sample/4096.0;
     sample -=0.5;
     
+    //sample =Gain(sample,3);
+    sample =Delay(sample,1);
     sample+=0.5;
     sample = sample *4096.0;
+    
     output(sample,0);
     
     return true;
@@ -52,7 +55,7 @@ void main(){
 
 
     struct repeating_timer timer;
-    add_repeating_timer_us(-1, repeating_timer_callback,NULL,&timer);
+    add_repeating_timer_us(12, repeating_timer_callback,NULL,&timer);
 
 
 
