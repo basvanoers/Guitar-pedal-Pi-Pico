@@ -187,6 +187,6 @@ float overdrive(float sample, float factor)
 float Vibrato(float sample, float freq)
 {
     delay_line_add(sample);
-    float Output = delay_line_get(LFO(freq,240));
+    float Output = delay_line_get(LFO(freq,480));
     return Output;
 }
