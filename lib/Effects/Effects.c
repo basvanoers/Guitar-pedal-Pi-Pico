@@ -112,7 +112,7 @@ float LFO(float freq,float amp)
 {
     Freq_lfo++;
 
-    if (Freq_lfo ==(100/freq))
+    if (Freq_lfo >=(100/freq))
     {
         counter_lfo++;
         Freq_lfo = 0;
@@ -156,8 +156,37 @@ float delay_line_get(float sample)
 float Flanger(float sample, float freq)
 {
     delay_line_add(sample);
-float Output = sample + delay_line_get(LFO(freq,480));
+float Output = sample + delay_line_get(LFO(freq,480))*0.8;
 
     return Output;
 }
+float Chorus(float sample,float freq)
+{
+    delay_line_add(sample);
+    float Output = sample+delay_line_get(LFO(freq,480))*0.4+delay_line_get(LFO(freq+1,480))*0.4+delay_line_get(LFO(freq+2,480))*0.4+delay_line_get(LFO(freq+3,480))*0.4;
+    return Output;
+}
 
+float overdrive(float sample, float factor)
+{
+    
+   
+    if (sample <-factor)
+    {
+        sample = -factor;
+    }
+    
+    if(sample >factor)
+    {
+        sample = factor;
+    }
+   
+    return sample;
+
+}
+float Vibrato(float sample, float freq)
+{
+    delay_line_add(sample);
+    float Output = delay_line_get(LFO(freq,240));
+    return Output;
+}

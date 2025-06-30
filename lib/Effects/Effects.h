@@ -20,4 +20,8 @@ float Tremelo(float sample, float freq);
 void delay_line_add(float sample);
 float delay_line_get(float sample);
 float Flanger(float sample, float freq);
+float Chorus(float sample,float freq);
+float overdrive(float sample, float factor);
+float Vibrato(float sample, float freq);
+float freq(float sample,float freq);
 
