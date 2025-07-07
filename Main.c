@@ -86,6 +86,7 @@ bool repeating_timer_callback(struct repeating_timer *t)
 {float sample = ADC_sample(); // get sample and put it in a variable
     sample = sample/4096.0;
     sample -=0.5;
+    sample = Pitch_shift(sample);
 
 //get button input
     bool current_pin4_state = gpio_get(4);
@@ -256,7 +257,7 @@ void main(){
 
 
     struct repeating_timer timer;
-    add_repeating_timer_us(12, repeating_timer_callback,NULL,&timer);
+    add_repeating_timer_us(7, repeating_timer_callback,NULL,&timer);
  
  aLastState = gpio_get(12);   
 

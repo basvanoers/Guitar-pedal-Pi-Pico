@@ -24,4 +24,7 @@ float Chorus(float sample,float freq);
 float overdrive(float sample, float factor);
 float Vibrato(float sample, float freq);
 float freq(float sample,float freq);
+float Pitch_shift(float sample);
+float Circulaire_buffer_get(float sample);
+float Circulair_buffer_add(float sample);
 

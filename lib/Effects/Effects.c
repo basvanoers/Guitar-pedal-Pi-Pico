@@ -150,9 +150,46 @@ float delay_line_get(float sample)
     {
         index =0;
     }
-    return Delay_line_buffer[(int)(SAMPLES-sample)];
+    return Delay_line_buffer[(int)(index)];
 }
 
+
+#define BUFFSIZE 1024
+float pitch_shift_array[BUFFSIZE] = {0};
+int index_pitch_shift_read = 0;
+int index_pitch_shift_write = BUFFSIZE/2;
+float s1=0;
+float s0=0;
+float f0=0.8;
+float f1 = 0;
+
+
+
+float Pitch_shift(float sample)
+{
+    f1 = 1-f0;
+    index_pitch_shift_write +=1;
+index_pitch_shift_read+=2;
+pitch_shift_array[index_pitch_shift_write] = sample;
+
+if (index_pitch_shift_write >=1024)
+{
+    index_pitch_shift_write =0;
+}
+if (index_pitch_shift_read >=1024)
+{
+    index_pitch_shift_read =0;
+}
+
+s0 = f0 * pitch_shift_array[index_pitch_shift_read];
+   s1 = f1 * pitch_shift_array[(index_pitch_shift_read + BUFFSIZE/2) % BUFFSIZE];
+   return s0 + s1;
+
+
+
+
+
+}
 float Flanger(float sample, float freq)
 {
     delay_line_add(sample);
