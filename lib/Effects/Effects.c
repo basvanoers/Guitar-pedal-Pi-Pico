@@ -154,19 +154,74 @@ float delay_line_get(float sample)
 }
 
 
+const int NL = 5;
+const float NUM[5] = {
+     0.9708778522795,   -3.883511409118,    5.825267113677,   -3.883511409118,
+     0.9708778522795
+};
+const int DL = 5;
+const float DEN[5] = {
+                   1,   -3.940892858927,    5.824419141289,    -3.82612983221,
+     0.9426038040469
+};
+float buffer[5]= {0};
+    float buffery[5]={0};
+    float output1 =0;
+    float  youtput =0;
+    int N=3;
+    int M= 3;
+
+
+float IIR_filter_300Hz(float sample)
+{
+ buffer[0] = sample;
+
+        output1 = 0;
+        youtput=0;
+        int k=0;
+        for (k=0;k <=N;k++)
+        {
+            output1 = output1 + NUM[k]*buffer[k];
+
+        }
+        int r=0;
+        for (r =1; r<=M;r++)
+        {
+           youtput = youtput + DEN[r]*buffery[r];
+
+        }
+        int i =N;
+        int a =M;
+        output1 -=youtput;
+        buffery[0] = output1;
+        for (a =M;a>=1;a--)
+        {
+            buffery[a]= buffery[a-1];
+
+        }
+        for(i =N; i>=1;i--)
+        {
+            buffer[i]= buffer[i-1];
+
+        }
+        return output1;
+}
+
+
 #define BUFFSIZE 1024
 float pitch_shift_array[BUFFSIZE] = {0};
 int index_pitch_shift_read = 0;
 int index_pitch_shift_write = BUFFSIZE/2;
 float s1=0;
 float s0=0;
-float f0=0.8;
+float f0=0.2;
 float f1 = 0;
 
 
 
 float Pitch_shift(float sample)
 {
+    //sample = IIR_filter_300Hz(sample);
     f1 = 1-f0;
     index_pitch_shift_write +=1;
 index_pitch_shift_read+=2;
@@ -190,6 +245,90 @@ s0 = f0 * pitch_shift_array[index_pitch_shift_read];
 
 
 }
+#define BufSize 1000
+#define Overlap 100
+
+
+int WtrP =0;
+float Rd_P =0;
+float Shift = 1.0;
+float CrossFade =1;
+float Buf[BufSize] = {0};
+float Do_PitchShift(float sample) {
+	
+
+	//write to ringbuffer
+	Buf[WtrP] = sample;
+
+	//read fractional readpointer and generate 0° and 180° read-pointer in integer
+	int RdPtr_Int = roundf(Rd_P);
+	int RdPtr_Int2 = 0;
+	if (RdPtr_Int >= BufSize/2) RdPtr_Int2 = RdPtr_Int - (BufSize/2);
+	else RdPtr_Int2 = RdPtr_Int + (BufSize/2);
+
+	//read the two samples...
+	float Rd0 = (float) Buf[RdPtr_Int];
+	float Rd1 = (float) Buf[RdPtr_Int2];
+
+	//Check if first readpointer starts overlap with write pointer?
+	// if yes -> do cross-fade to second read-pointer
+	if (Overlap >= (WtrP-RdPtr_Int) && (WtrP-RdPtr_Int) >= 0 && Shift!=1.0f) {
+		int rel = WtrP-RdPtr_Int;
+		CrossFade = ((float)rel)/(float)Overlap;
+	}
+	else if (WtrP-RdPtr_Int == 0) CrossFade = 0.0f;
+
+	//Check if second readpointer starts overlap with write pointer?
+	// if yes -> do cross-fade to first read-pointer
+	if (Overlap >= (WtrP-RdPtr_Int2) && (WtrP-RdPtr_Int2) >= 0 && Shift!=1.0f) {
+			int rel = WtrP-RdPtr_Int2;
+			CrossFade = 1.0f - ((float)rel)/(float)Overlap;
+		}
+	else if (WtrP-RdPtr_Int2 == 0) CrossFade = 1.0f;
+
+
+	//do cross-fading and sum up
+	sample = (Rd0*CrossFade + Rd1*(1.0f-CrossFade));
+
+	//increment fractional read-pointer and write-pointer
+	Rd_P += Shift;
+	WtrP++;
+	if (WtrP == BufSize) WtrP = 0;
+	if (roundf(Rd_P) >= BufSize) Rd_P = 0.0f;
+
+	return sample;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 float Flanger(float sample, float freq)
 {
     delay_line_add(sample);

@@ -27,4 +27,6 @@ float freq(float sample,float freq);
 float Pitch_shift(float sample);
 float Circulaire_buffer_get(float sample);
 float Circulair_buffer_add(float sample);
+float Do_PitchShift(float sample);
+float IIR_filter_300Hz(float sample);
 
