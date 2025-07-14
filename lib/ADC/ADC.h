@@ -8,5 +8,6 @@
 #define NSAMP 1000
 #include <stdio.h>
 #include <stdint.h>
+
 void ADC_init(int CAPTURE_CHANNEL, int CLOCK_DIV);
-float ADC_sample();
+float ADC_sample(void);

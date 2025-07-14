@@ -6,66 +6,66 @@
 #include  "PWM.h"
 #include "pico/stdlib.h"
 
-float LFO_array[480] = {2, 4, 6, 8, 10, 12, 14, 16,
-18, 20, 22, 24, 26, 28, 30, 32,
-34, 36, 38, 40, 42, 44, 46, 48,
-50, 52, 54, 56, 58, 60, 62, 64,
-66, 68, 70, 72, 74, 76, 78, 80,
-82, 84, 86, 88, 90, 92, 94, 96,
-98, 100, 102, 104, 106, 108, 110, 112,
-114, 116, 118, 120, 122, 124, 126, 128,
-130, 132, 134, 136, 138, 140, 142, 144,
-146, 148, 150, 152, 154, 156, 158, 160,
-162, 164, 166, 168, 170, 172, 174, 176,
-178, 180, 182, 184, 186, 188, 190, 192,
-194, 196, 198, 200, 202, 204, 206, 208,
-210, 212, 214, 216, 218, 220, 222, 224,
-226, 228, 230, 232, 234, 236, 238, 240,
-242, 244, 246, 248, 250, 252, 254, 256,
-258, 260, 262, 264, 266, 268, 270, 272,
-274, 276, 278, 280, 282, 284, 286, 288,
-290, 292, 294, 296, 298, 300, 302, 304,
-306, 308, 310, 312, 314, 316, 318, 320,
-322, 324, 326, 328, 330, 332, 334, 336,
-338, 340, 342, 344, 346, 348, 350, 352,
-354, 356, 358, 360, 362, 364, 366, 368,
-370, 372, 374, 376, 378, 380, 382, 384,
-386, 388, 390, 392, 394, 396, 398, 400,
-402, 404, 406, 408, 410, 412, 414, 416,
-418, 420, 422, 424, 426, 428, 430, 432,
-434, 436, 438, 440, 442, 444, 446, 448,
-450, 452, 454, 456, 458, 460, 462, 464,
-466, 468, 470, 472, 474, 476, 478, 480,
-478, 476, 474, 472, 470, 468, 466, 464,
-462, 460, 458, 456, 454, 452, 450, 448,
-446, 444, 442, 440, 438, 436, 434, 432,
-430, 428, 426, 424, 422, 420, 418, 416,
-414, 412, 410, 408, 406, 404, 402, 400,
-398, 396, 394, 392, 390, 388, 386, 384,
-382, 380, 378, 376, 374, 372, 370, 368,
-366, 364, 362, 360, 358, 356, 354, 352,
-350, 348, 346, 344, 342, 340, 338, 336,
-334, 332, 330, 328, 326, 324, 322, 320,
-318, 316, 314, 312, 310, 308, 306, 304,
-302, 300, 298, 296, 294, 292, 290, 288,
-286, 284, 282, 280, 278, 276, 274, 272,
-270, 268, 266, 264, 262, 260, 258, 256,
-254, 252, 250, 248, 246, 244, 242, 240,
-238, 236, 234, 232, 230, 228, 226, 224,
-222, 220, 218, 216, 214, 212, 210, 208,
-206, 204, 202, 200, 198, 196, 194, 192,
-190, 188, 186, 184, 182, 180, 178, 176,
-174, 172, 170, 168, 166, 164, 162, 160,
-158, 156, 154, 152, 150, 148, 146, 144,
-142, 140, 138, 136, 134, 132, 130, 128,
-126, 124, 122, 120, 118, 116, 114, 112,
-110, 108, 106, 104, 102, 100, 98, 96,
-94, 92, 90, 88, 86, 84, 82, 80,
-78, 76, 74, 72, 70, 68, 66, 64,
-62, 60, 58, 56, 54, 52, 50, 48,
-46, 44, 42, 40, 38, 36, 34, 32,
-30, 28, 26, 24, 22, 20, 18, 16,
-14, 12, 10, 8, 6, 4, 2, 0};
+float LFO_array[480] = {240, 243, 246, 249, 253, 256, 259, 262,
+265, 268, 271, 274, 278, 281, 284, 287,
+290, 293, 296, 299, 302, 305, 308, 311,
+314, 317, 320, 323, 326, 329, 332, 335,
+338, 340, 343, 346, 349, 352, 355, 357,
+360, 363, 365, 368, 371, 373, 376, 379,
+381, 384, 386, 389, 391, 393, 396, 398,
+401, 403, 405, 407, 410, 412, 414, 416,
+418, 420, 422, 425, 427, 428, 430, 432,
+434, 436, 438, 440, 441, 443, 445, 446,
+448, 449, 451, 452, 454, 455, 457, 458,
+459, 461, 462, 463, 464, 465, 466, 467,
+468, 469, 470, 471, 472, 473, 473, 474,
+475, 475, 476, 477, 477, 478, 478, 478,
+479, 479, 479, 479, 480, 480, 480, 480,
+480, 480, 480, 480, 480, 479, 479, 479,
+479, 478, 478, 478, 477, 477, 476, 475,
+475, 474, 473, 473, 472, 471, 470, 469,
+468, 467, 466, 465, 464, 463, 462, 461,
+459, 458, 457, 455, 454, 452, 451, 449,
+448, 446, 445, 443, 441, 440, 438, 436,
+434, 432, 430, 428, 427, 425, 422, 420,
+418, 416, 414, 412, 410, 407, 405, 403,
+401, 398, 396, 393, 391, 389, 386, 384,
+381, 379, 376, 373, 371, 368, 365, 363,
+360, 357, 355, 352, 349, 346, 343, 340,
+338, 335, 332, 329, 326, 323, 320, 317,
+314, 311, 308, 305, 302, 299, 296, 293,
+290, 287, 284, 281, 278, 274, 271, 268,
+265, 262, 259, 256, 253, 249, 246, 243,
+240, 237, 234, 231, 227, 224, 221, 218,
+215, 212, 209, 206, 202, 199, 196, 193,
+190, 187, 184, 181, 178, 175, 172, 169,
+166, 163, 160, 157, 154, 151, 148, 145,
+142, 140, 137, 134, 131, 128, 125, 123,
+120, 117, 115, 112, 109, 107, 104, 101,
+99, 96, 94, 91, 89, 87, 84, 82,
+79, 77, 75, 73, 70, 68, 66, 64,
+62, 60, 58, 55, 53, 52, 50, 48,
+46, 44, 42, 40, 39, 37, 35, 34,
+32, 31, 29, 28, 26, 25, 23, 22,
+21, 19, 18, 17, 16, 15, 14, 13,
+12, 11, 10, 9, 8, 7, 7, 6,
+5, 5, 4, 3, 3, 2, 2, 2,
+1, 1, 1, 1, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 1, 1, 1,
+1, 2, 2, 2, 3, 3, 4, 5,
+5, 6, 7, 7, 8, 9, 10, 11,
+12, 13, 14, 15, 16, 17, 18, 19,
+21, 22, 23, 25, 26, 28, 29, 31,
+32, 34, 35, 37, 39, 40, 42, 44,
+46, 48, 50, 52, 53, 55, 58, 60,
+62, 64, 66, 68, 70, 73, 75, 77,
+79, 82, 84, 87, 89, 91, 94, 96,
+99, 101, 104, 107, 109, 112, 115, 117,
+120, 123, 125, 128, 131, 134, 137, 140,
+142, 145, 148, 151, 154, 157, 160, 163,
+166, 169, 172, 175, 178, 181, 184, 187,
+190, 193, 196, 199, 202, 206, 209, 212,
+215, 218, 221, 224, 227, 231, 234, 237};
 
 int i =0;
 
@@ -98,7 +98,7 @@ float c=0.5;
 float delay_buffer[48000] = {0};
 float Delay(float sample,float tijd)
 {
-    int N = 48000/tijd;
+    int N = (int)(48000/tijd);
     float Output = sample + delay_buffer[n]*c;
     delay_buffer[n] = Output;
     n=(n+1)%N;
@@ -152,182 +152,65 @@ float delay_line_get(float sample)
     }
     return Delay_line_buffer[(int)(index)];
 }
+float a0, a1, a2, b1, b2, hp_in_z1, hp_in_z2, hp_out_z1, hp_out_z2;
+float Do_HighPass (float inSample) {
+	//300Hz high-pass, 96k
+	a0 = 0.9862117951198142f;
+	a1 = -1.9724235902396283f;
+	a2 = 0.9862117951198142f;
+	b1 = -1.972233470205696f;
+	b2 = 0.9726137102735608f;
 
+	float inSampleF = (float)inSample;
+	float outSampleF =
+			a0 * inSampleF
+			+ a1 * hp_in_z1
+			+ a2 * hp_in_z2
+			- b1 * hp_out_z1
+			- b2 * hp_out_z2;
+	hp_in_z2 = hp_in_z1;
+	hp_in_z1 = inSampleF;
+	hp_out_z2 = hp_out_z1;
+	hp_out_z1 = outSampleF;
 
-const int NL = 5;
-const float NUM[5] = {
-     0.9708778522795,   -3.883511409118,    5.825267113677,   -3.883511409118,
-     0.9708778522795
-};
-const int DL = 5;
-const float DEN[5] = {
-                   1,   -3.940892858927,    5.824419141289,    -3.82612983221,
-     0.9426038040469
-};
-float buffer[5]= {0};
-    float buffery[5]={0};
-    float output1 =0;
-    float  youtput =0;
-    int N=3;
-    int M= 3;
-
-
-float IIR_filter_300Hz(float sample)
-{
- buffer[0] = sample;
-
-        output1 = 0;
-        youtput=0;
-        int k=0;
-        for (k=0;k <=N;k++)
-        {
-            output1 = output1 + NUM[k]*buffer[k];
-
-        }
-        int r=0;
-        for (r =1; r<=M;r++)
-        {
-           youtput = youtput + DEN[r]*buffery[r];
-
-        }
-        int i =N;
-        int a =M;
-        output1 -=youtput;
-        buffery[0] = output1;
-        for (a =M;a>=1;a--)
-        {
-            buffery[a]= buffery[a-1];
-
-        }
-        for(i =N; i>=1;i--)
-        {
-            buffer[i]= buffer[i-1];
-
-        }
-        return output1;
+	return  outSampleF;
 }
 
 
-#define BUFFSIZE 1024
-float pitch_shift_array[BUFFSIZE] = {0};
-int index_pitch_shift_read = 0;
-int index_pitch_shift_write = BUFFSIZE/2;
-float s1=0;
-float s0=0;
-float f0=0.2;
-float f1 = 0;
 
 
 
+
+
+
+float s0,s1,f1,f0;
+#define BUFSIZE 1024
+float Pitch_buffer[1024] = {0};
+int read_index = 0;
+int write_index = BUFSIZE/2;
 float Pitch_shift(float sample)
 {
-    //sample = IIR_filter_300Hz(sample);
-    f1 = 1-f0;
-    index_pitch_shift_write +=1;
-index_pitch_shift_read+=2;
-pitch_shift_array[index_pitch_shift_write] = sample;
+    sample = Do_HighPass(sample);
+    f0 = 0.25;
+    f1= 1-f0;
 
-if (index_pitch_shift_write >=1024)
-{
-    index_pitch_shift_write =0;
-}
-if (index_pitch_shift_read >=1024)
-{
-    index_pitch_shift_read =0;
-}
-
-s0 = f0 * pitch_shift_array[index_pitch_shift_read];
-   s1 = f1 * pitch_shift_array[(index_pitch_shift_read + BUFFSIZE/2) % BUFFSIZE];
+    read_index +=2;
+   
+    if (read_index >= BUFSIZE)
+    {
+        read_index =0;
+    }
+    if (write_index >= BUFSIZE)
+    {
+        write_index =0;
+    }
+    Pitch_buffer[write_index] = sample;
+s0 = f0 * Pitch_buffer[read_index];
+   s1 = f1 * Pitch_buffer[(read_index + BUFSIZE/2) % BUFSIZE];
+    write_index +=1;
    return s0 + s1;
 
-
-
-
-
 }
-#define BufSize 1000
-#define Overlap 100
-
-
-int WtrP =0;
-float Rd_P =0;
-float Shift = 1.0;
-float CrossFade =1;
-float Buf[BufSize] = {0};
-float Do_PitchShift(float sample) {
-	
-
-	//write to ringbuffer
-	Buf[WtrP] = sample;
-
-	//read fractional readpointer and generate 0° and 180° read-pointer in integer
-	int RdPtr_Int = roundf(Rd_P);
-	int RdPtr_Int2 = 0;
-	if (RdPtr_Int >= BufSize/2) RdPtr_Int2 = RdPtr_Int - (BufSize/2);
-	else RdPtr_Int2 = RdPtr_Int + (BufSize/2);
-
-	//read the two samples...
-	float Rd0 = (float) Buf[RdPtr_Int];
-	float Rd1 = (float) Buf[RdPtr_Int2];
-
-	//Check if first readpointer starts overlap with write pointer?
-	// if yes -> do cross-fade to second read-pointer
-	if (Overlap >= (WtrP-RdPtr_Int) && (WtrP-RdPtr_Int) >= 0 && Shift!=1.0f) {
-		int rel = WtrP-RdPtr_Int;
-		CrossFade = ((float)rel)/(float)Overlap;
-	}
-	else if (WtrP-RdPtr_Int == 0) CrossFade = 0.0f;
-
-	//Check if second readpointer starts overlap with write pointer?
-	// if yes -> do cross-fade to first read-pointer
-	if (Overlap >= (WtrP-RdPtr_Int2) && (WtrP-RdPtr_Int2) >= 0 && Shift!=1.0f) {
-			int rel = WtrP-RdPtr_Int2;
-			CrossFade = 1.0f - ((float)rel)/(float)Overlap;
-		}
-	else if (WtrP-RdPtr_Int2 == 0) CrossFade = 1.0f;
-
-
-	//do cross-fading and sum up
-	sample = (Rd0*CrossFade + Rd1*(1.0f-CrossFade));
-
-	//increment fractional read-pointer and write-pointer
-	Rd_P += Shift;
-	WtrP++;
-	if (WtrP == BufSize) WtrP = 0;
-	if (roundf(Rd_P) >= BufSize) Rd_P = 0.0f;
-
-	return sample;
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 float Flanger(float sample, float freq)
 {
@@ -345,6 +228,7 @@ float Chorus(float sample,float freq)
 
 float overdrive(float sample, float factor)
 {
+    sample = Gain(sample,5);
     
    
     if (sample <-factor)

@@ -30,6 +30,10 @@
 #define GREEN 2
 #define YELLOW 4
 #define white_green 5
+#define PURPLE 6
+#define DARK_PURPLE 7
+#define BEIGE 8
+#define ORANGE 9
 typedef struct {
 float Delay ;
 float Gain;
@@ -46,7 +50,7 @@ Settings waardes = {
     .vibrato = 1
 };
 
-int color[6][3]={{0,0,0},{0,255,255},{255,0,255},{255,255,0},{0,0,255},{255,0,30}};
+int color[10][3]={{0,0,0},{0,255,255},{255,0,255},{255,255,0},{0,0,255},{255,0,30},{0,255,0},{191,228,189},{36,78,147},{0,107,255}};
 
  int counter = 0; 
  int aState;
@@ -84,9 +88,10 @@ int rotery_encoder()
 
 bool repeating_timer_callback(struct repeating_timer *t)
 {float sample = ADC_sample(); // get sample and put it in a variable
+    
     sample = sample/4096.0;
     sample -=0.5;
-    //sample = Do_PitchShift(sample);
+    
 
 //get button input
     bool current_pin4_state = gpio_get(4);
@@ -126,7 +131,7 @@ bool repeating_timer_callback(struct repeating_timer *t)
    
 
 
-printf("%d\n",current_effect);
+
 
 
 
@@ -152,7 +157,11 @@ printf("%d\n",current_effect);
         RGB_color(15,10,13,color,GREEN);
     }
     else{
-        waardes.Delay = setting_value;
+        waardes.Delay = setting_value*0.1;
+        if(waardes.Delay<1)
+        {
+            waardes.Delay =1;
+        }
     }
         
         sample = Delay(sample,waardes.Delay);
@@ -164,11 +173,16 @@ printf("%d\n",current_effect);
         RGB_color(15,10,13,color,GREEN);
     }
     else{
-        waardes.Delay = setting_value;
+        waardes.Delay = setting_value*0.1;
+        if (waardes.Delay <1)
+        {
+            waardes.Delay=1;
+        }
     
-        
-        sample = Delay(sample,waardes.Delay);
+       
     }
+     sample = Delay(sample,waardes.Delay);
+        
         break;
 
     case 3 :
@@ -196,23 +210,51 @@ RGB_color(15,10,13,color,BLUE);
         break;
 
     case 5 :
+    RGB_color(15,10,13,color,ORANGE);
 sample = Flanger(sample,1);
         break;
     case 6:
+    RGB_color(15,10,13,color,ORANGE);
     sample = Flanger(sample,1);
         break;
     case 7:
+ if(setting)
+    {
+RGB_color(15,10,13,color,PURPLE);
+    }
+    else{
+        waardes.clipping = setting_value*0.01;
+    }
+    
 sample = overdrive(sample,waardes.clipping);
         break;
     case 8:
+   if(setting)
+    {
+RGB_color(15,10,13,color,PURPLE);
+    }
+    else{
+        waardes.clipping = setting_value*0.01;
+    }
+    
 sample = overdrive(sample,waardes.clipping);
         break;
     case 9:
+    RGB_color(15,10,13,color,BEIGE);
 sample = Vibrato(sample,waardes.vibrato);
         break;
     case 10:
+    RGB_color(15,10,13,color,BEIGE);
 sample = Vibrato(sample,waardes.vibrato);
         break;
+    case 11:
+    RGB_color(15,10,13,color,DARK_PURPLE);
+    sample = Pitch_shift(sample);
+    break;
+    case 12:
+    RGB_color(15,10,13,color,DARK_PURPLE);
+    sample = Pitch_shift(sample);
+    break;
     default:
         break;
     }
@@ -233,9 +275,13 @@ sample = Vibrato(sample,waardes.vibrato);
 
 
  last_pin4_state = current_pin4_state;
+ 
     sample+=0.5;
     sample = sample *4096.0;
-    
+    if (sample < 100)
+    {
+        sample = 0;
+    }
     output(sample,0);
     
     return true;
@@ -248,8 +294,8 @@ void main(){
 
 
    
-    stdio_init_all();
-    ADC_init(0,96);
+    //stdio_init_all();
+    ADC_init(0,50000);
     RGB_led_init(13,10,15);
     effect_init(0);
 

@@ -3,12 +3,14 @@
 #define PWM_WRAP 4095
 void pwm_init_pin(uint gpio_pin) {
     gpio_set_function(gpio_pin, GPIO_FUNC_PWM);
-    uint slice=pwm_gpio_to_slice_num (gpio_pin); 
-    uint channel=pwm_gpio_to_channel (gpio_pin);  
-    pwm_set_enabled (slice, 1);
-    
-    pwm_set_wrap (slice, 4097);
-          
+    uint slice = pwm_gpio_to_slice_num(gpio_pin);
+
+    pwm_config config = pwm_get_default_config();
+    pwm_config_set_clkdiv(&config, 1.0f);           // Fastest clock
+    pwm_config_set_wrap(&config, 2500);   // Lower wrap = higher freq
+
+    pwm_init(slice, &config, true);  // start now
+    pwm_set_enabled(slice, true);
 }
 void RGB_led_init(uint R,uint B ,uint G)
 {
@@ -41,6 +43,7 @@ void RGB_color(uint R_pin,uint B_pin,uint G_pin,int color[][3],int Color)
 }
 
 // Set duty cycle using a 12-bit value (0–4095)
-void output(uint16_t value,uint gpio_pin) {
-    pwm_set_gpio_level (gpio_pin,value ); 
+void output(uint16_t value, uint gpio_pin) {
+   
+    pwm_set_gpio_level(gpio_pin, value);
 }
