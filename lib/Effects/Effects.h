@@ -24,6 +24,7 @@ float Chorus(float sample,float freq);
 float overdrive(float sample, float factor);
 float Vibrato(float sample, float freq);
 float freq(float sample,float freq);
-float Pitch_shift(float sample);
-
+float Pitch_shift(float sample, int shift);
+float All_pass_process(float sample, float k);
+float Phaser(float sample, float Freq);
 

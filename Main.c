@@ -7,6 +7,8 @@
 #include "ADC.h"
 #include <stdio.h>
 #include "hardware/pwm.h"
+#include "hardware/clocks.h"
+
 
 
 #include <math.h>
@@ -34,12 +36,14 @@
 #define DARK_PURPLE 7
 #define BEIGE 8
 #define ORANGE 9
+#define OFF 10
 typedef struct {
 float Delay ;
 float Gain;
 float Tremelo;
 float clipping;
 float vibrato;
+float shift;
 
 } Settings ;
 Settings waardes = {
@@ -47,10 +51,11 @@ Settings waardes = {
     .Delay = 1,
     .Tremelo = 1,
     .clipping = 0.11,
-    .vibrato = 1
+    .vibrato = 1,
+    .shift = 2
 };
 
-int color[10][3]={{0,0,0},{0,255,255},{255,0,255},{255,255,0},{0,0,255},{255,0,30},{0,255,0},{191,228,189},{36,78,147},{0,107,255}};
+int color[11][3]={{0,0,0},{0,255,255},{255,0,255},{255,255,0},{0,0,255},{255,0,30},{0,255,0},{191,228,189},{36,78,147},{0,107,255},{255,255,255}};
 
  int counter = 0; 
  int aState;
@@ -89,9 +94,9 @@ int rotery_encoder()
 bool repeating_timer_callback(struct repeating_timer *t)
 {float sample = ADC_sample(); // get sample and put it in a variable
     
-    sample = sample/4096.0;
+ sample = sample/4096.0;
     sample -=0.5;
-    
+                                                     
 
 //get button input
     bool current_pin4_state = gpio_get(4);
@@ -138,7 +143,7 @@ bool repeating_timer_callback(struct repeating_timer *t)
     if (true){
     switch (current_effect)
     {
-    
+   
     case 0:
     if (setting)
     {
@@ -248,13 +253,45 @@ sample = Vibrato(sample,waardes.vibrato);
 sample = Vibrato(sample,waardes.vibrato);
         break;
     case 11:
-    RGB_color(15,10,13,color,DARK_PURPLE);
-    sample = Pitch_shift(sample);
+    if(setting)
+    {
+RGB_color(15,10,13,color,DARK_PURPLE);
+    }
+    else{
+        waardes.shift = setting_value*0.5;
+    }
+    
+sample = Pitch_shift(sample,(int)waardes.shift);
     break;
     case 12:
-    RGB_color(15,10,13,color,DARK_PURPLE);
-    sample = Pitch_shift(sample);
+    if(setting)
+    {
+RGB_color(15,10,13,color,DARK_PURPLE);
+    }
+    else{
+        waardes.shift = setting_value*0.5;
+    }
+    
+sample = Pitch_shift(sample,(int)waardes.shift);
     break;
+
+    case 13:
+    sample = Phaser(sample,1);
+    break;
+    case 14:
+    sample = Phaser(sample,1);
+    break;
+    case 15:
+    sample = 0;
+    RGB_color(15,10,13,color, OFF);
+
+    break;
+    case 16:
+    sample = 0;
+    RGB_color(15,10,13,color, OFF);
+
+    break;
+   
     default:
         break;
     }
@@ -278,7 +315,7 @@ sample = Vibrato(sample,waardes.vibrato);
  
     sample+=0.5;
     sample = sample *4096.0;
-    if (sample < 100)
+    if (sample < 1000)
     {
         sample = 0;
     }
