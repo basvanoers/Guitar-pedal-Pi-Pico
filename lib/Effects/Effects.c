@@ -83,7 +83,7 @@ void effect_init(const int GPIO_PIN)
     gpio_pull_up(11);
     gpio_pull_up(12);
     gpio_init(4);
-    gpio_set_dir(4, 1);
+    gpio_set_dir(4, 0);
     gpio_pull_down(4);
 }
 
@@ -152,65 +152,6 @@ float delay_line_get(float sample)
     }
     return Delay_line_buffer[(int)(index)];
 }
-float a0, a1, a2, b1, b2, hp_in_z1, hp_in_z2, hp_out_z1, hp_out_z2;
-float Do_HighPass (float inSample) {
-	//300Hz high-pass, 96k
-	a0 = 0.9862117951198142f;
-	a1 = -1.9724235902396283f;
-	a2 = 0.9862117951198142f;
-	b1 = -1.972233470205696f;
-	b2 = 0.9726137102735608f;
-
-	float inSampleF = (float)inSample;
-	float outSampleF =
-			a0 * inSampleF
-			+ a1 * hp_in_z1
-			+ a2 * hp_in_z2
-			- b1 * hp_out_z1
-			- b2 * hp_out_z2;
-	hp_in_z2 = hp_in_z1;
-	hp_in_z1 = inSampleF;
-	hp_out_z2 = hp_out_z1;
-	hp_out_z1 = outSampleF;
-
-	return  outSampleF;
-}
-
-
-
-
-
-
-
-
-float s0,s1,f1,f0;
-#define BUFSIZE 1024
-float Pitch_buffer[1024] = {0};
-int read_index = 0;
-int write_index = BUFSIZE/2;
-float Pitch_shift(float sample, int shift)
-{
-   // sample = Do_HighPass(sample);
-    f0 = 0.25;
-    f1= 1-f0;
-
-    read_index +=shift;
-   
-    if (read_index >= BUFSIZE)
-    {
-        read_index =0;
-    }
-    if (write_index >= BUFSIZE)
-    {
-        write_index =0;
-    }
-    Pitch_buffer[write_index] = sample;
-s0 = f0 * Pitch_buffer[read_index];
-   s1 = f1 * Pitch_buffer[(read_index + BUFSIZE/2) % BUFSIZE];
-    write_index +=2;
-   return s0 + s1;
-
-}
 
 float Flanger(float sample, float freq)
 {
@@ -244,32 +185,90 @@ float overdrive(float sample, float factor)
     return sample;
 
 }
-float Vibrato(float sample, float freq)
-{
-    delay_line_add(sample);
-    float Output = delay_line_get(LFO(freq,480));
-    return Output;
+
+#define BufSize 1000
+#define Overlap 100
+
+float Buf[BufSize];
+
+int WtrP =0;;
+float Rd_P =0.0f;
+float Shift =1.95;
+float CrossFade = 1.0f;
+float a0, a1, a2, b1, b2, hp_in_z1, hp_in_z2, hp_out_z1, hp_out_z2;
+
+//0°
+	
+
+    float Do_HighPass (float inSample) {
+	//300Hz high-pass, 96k
+	a0 = 0.9862117951198142f;
+	a1 = -1.9724235902396283f;
+	a2 = 0.9862117951198142f;
+	b1 = -1.972233470205696f;
+	b2 = 0.9726137102735608f;
+
+	float inSampleF = (float)inSample;
+	float outSampleF =
+			a0 * inSampleF
+			+ a1 * hp_in_z1
+			+ a2 * hp_in_z2
+			- b1 * hp_out_z1
+			- b2 * hp_out_z2;
+	hp_in_z2 = hp_in_z1;
+	hp_in_z1 = inSampleF;
+	hp_out_z2 = hp_out_z1;
+	hp_out_z1 = outSampleF;
+
+	return  outSampleF;
 }
-float x0 = 0;
-float x1 = 0;
-float z0=0;
-float z1 =0;
 
-float All_pass_process(float sample, float a1)
-{
-    x1 =x0;
+float Do_PitchShift(float sum) {
+	
+	//sum up and do high-pass
+	sum=Do_HighPass(sum);
+
+	//write to ringbuffer
+	Buf[WtrP] = sum;
+
+	//read fractional readpointer and generate 0° and 180° read-pointer in integer
+	int RdPtr_Int = roundf(Rd_P);
+	int RdPtr_Int2 = 0;
+	if (RdPtr_Int >= BufSize/2) RdPtr_Int2 = RdPtr_Int - (BufSize/2);
+	else RdPtr_Int2 = RdPtr_Int + (BufSize/2);
+
+	//read the two samples...
+	float Rd0 = (float) Buf[RdPtr_Int];
+	float Rd1 = (float) Buf[RdPtr_Int2];
+
+	//Check if first readpointer starts overlap with write pointer?
+	// if yes -> do cross-fade to second read-pointer
+	if (Overlap >= (WtrP-RdPtr_Int) && (WtrP-RdPtr_Int) >= 0 && Shift!=1.0f) {
+		int rel = WtrP-RdPtr_Int;
+		CrossFade = ((float)rel)/(float)Overlap;
+	}
+	else if (WtrP-RdPtr_Int == 0) CrossFade = 0.0f;
+
+	//Check if second readpointer starts overlap with write pointer?
+	// if yes -> do cross-fade to first read-pointer
+	if (Overlap >= (WtrP-RdPtr_Int2) && (WtrP-RdPtr_Int2) >= 0 && Shift!=1.0f) {
+			int rel = WtrP-RdPtr_Int2;
+			CrossFade = 1.0f - ((float)rel)/(float)Overlap;
+		}
+	else if (WtrP-RdPtr_Int2 == 0) CrossFade = 1.0f;
 
 
-    x0 = sample;
-    z1=z0;
-    z0 = a1*x0-a1*z1 +x1;
+	//do cross-fading and sum up
+	sum = (Rd0*CrossFade + Rd1*(1.0f-CrossFade));
 
-    return z0;
+	//increment fractional read-pointer and write-pointer
+	Rd_P += Shift;
+	WtrP++;
+	if (WtrP == BufSize) WtrP = 0;
+	if (roundf(Rd_P) >= BufSize) Rd_P = 0.0f;
 
+	return sum;
 
 
 }
-float Phaser(float sample, float Freq)
-{
-    sample = sample + All_pass_process(sample, LFO(Freq, 2));
-}
+

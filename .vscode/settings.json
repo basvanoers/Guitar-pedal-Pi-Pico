@@ -47,6 +47,9 @@
         "stdint.h": "c",
         "compare": "c",
         "cstdint": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "clocks.h": "c",
+        "i2s.h": "c",
+        "timer.h": "c"
     }
 }

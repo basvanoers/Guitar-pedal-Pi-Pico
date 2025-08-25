@@ -27,4 +27,5 @@ float freq(float sample,float freq);
 float Pitch_shift(float sample, int shift);
 float All_pass_process(float sample, float k);
 float Phaser(float sample, float Freq);
-
+float Do_HighPass (float inSample);
+float Do_PitchShift(float sum);

@@ -1,27 +1,27 @@
+#include <stdio.h>
+#include <math.h>
+#include "pico/stdlib.h"
+
 #include "hardware/adc.h"
 #include "hardware/dma.h"
 #include "hardware/pio.h"
 #include "hardware/timer.h"
-#include"lib/ADC/ADC.h"
-#include <stdio.h>
-#include "ADC.h"
-#include <stdio.h>
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
 
 
-
-#include <math.h>
-#include "pico/stdlib.h"
+#include"lib/ADC/ADC.h"
 #include "lib/PWM/PWM.h"
 #include "lib/I2S/I2S.h"
-#include "PWM.pio.h"
-#include "I2S.pio.h"
 #include"lib/Effects/Effects.h"
 
+#include "PWM.pio.h"
+#include "I2S.pio.h"
 
-#define sample_freq 48000
-#define sample_time_us (1000000/48000)
+
+
+#define Fs 48000
+#define Ts (1/Fs)
 
 
 
@@ -37,6 +37,8 @@
 #define BEIGE 8
 #define ORANGE 9
 #define OFF 10
+#define DARK_GREEN 11
+
 typedef struct {
 float Delay ;
 float Gain;
@@ -44,6 +46,7 @@ float Tremelo;
 float clipping;
 float vibrato;
 float shift;
+float tanh_Gain;
 
 } Settings ;
 Settings waardes = {
@@ -52,10 +55,11 @@ Settings waardes = {
     .Tremelo = 1,
     .clipping = 0.11,
     .vibrato = 1,
-    .shift = 2
+    .shift = 2,
+    .tanh_Gain =1
 };
 
-int color[11][3]={{0,0,0},{0,255,255},{255,0,255},{255,255,0},{0,0,255},{255,0,30},{0,255,0},{191,228,189},{36,78,147},{0,107,255},{255,255,255}};
+int color[12][3]={{0,0,0},{0,255,255},{255,0,255},{255,255,0},{0,0,255},{255,0,30},{0,255,0},{191,228,189},{36,78,147},{0,107,255},{255,255,255},{239,204,226}};
 
  int counter = 0; 
  int aState;
@@ -66,7 +70,7 @@ bool last_pin4_state= false;
 int setting_value=0;
 int remeber_effect=0;
 int j=0;
-
+uint DMA_channel;
 
 
 
@@ -92,12 +96,14 @@ int rotery_encoder()
 
 
 bool repeating_timer_callback(struct repeating_timer *t)
-{float sample = ADC_sample(); // get sample and put it in a variable
+{
+    //dma_channel_wait_for_finish_blocking(DMA_channel);
+    float sample = ADC_sample(); // get sample and put it in a variable
     
  sample = sample/4096.0;
     sample -=0.5;
-                                                     
-
+                                              
+Do_HighPass(sample);
 //get button input
     bool current_pin4_state = gpio_get(4);
     
@@ -246,11 +252,11 @@ sample = overdrive(sample,waardes.clipping);
         break;
     case 9:
     RGB_color(15,10,13,color,BEIGE);
-sample = Vibrato(sample,waardes.vibrato);
+//sample = Vibrato(sample,waardes.vibrato);
         break;
     case 10:
     RGB_color(15,10,13,color,BEIGE);
-sample = Vibrato(sample,waardes.vibrato);
+//sample = Vibrato(sample,waardes.vibrato);
         break;
     case 11:
     if(setting)
@@ -261,7 +267,7 @@ RGB_color(15,10,13,color,DARK_PURPLE);
         waardes.shift = setting_value*0.5;
     }
     
-sample = Pitch_shift(sample,(int)waardes.shift);
+sample = Do_PitchShift(sample);
     break;
     case 12:
     if(setting)
@@ -272,14 +278,30 @@ RGB_color(15,10,13,color,DARK_PURPLE);
         waardes.shift = setting_value*0.5;
     }
     
-sample = Pitch_shift(sample,(int)waardes.shift);
+sample = Do_PitchShift(sample);
     break;
 
     case 13:
-    sample = Phaser(sample,1);
+    if(setting)
+    {
+RGB_color(15,10,13,color,DARK_GREEN);
+    }
+    else{
+        waardes.tanh_Gain = setting_value;
+    }
+    
+sample = tanh(sample*waardes.tanh_Gain);
     break;
-    case 14:
-    sample = Phaser(sample,1);
+   case 14:
+    if(setting)
+    {
+RGB_color(15,10,13,color,DARK_GREEN);
+    }
+    else{
+        waardes.tanh_Gain = setting_value;
+    }
+    
+sample = tanh(sample*waardes.tanh_Gain);
     break;
     case 15:
     sample = 0;
@@ -332,23 +354,25 @@ void main(){
 
    
     //stdio_init_all();
-    ADC_init(0,50000);
+    
     RGB_led_init(13,10,15);
     effect_init(0);
-
+ADC_init(0,63); 
  
 
 
     struct repeating_timer timer;
     add_repeating_timer_us(12, repeating_timer_callback,NULL,&timer);
  
- aLastState = gpio_get(12);   
+ aLastState = gpio_get(12);  
+// DMA_channel = 
 
 
  
 while (1) {
 
     
+
     tight_loop_contents();   
     
   
