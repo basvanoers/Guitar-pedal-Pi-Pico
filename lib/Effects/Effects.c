@@ -163,7 +163,7 @@ float Output = sample + delay_line_get(LFO(freq,480))*0.8;
 float Chorus(float sample,float freq)
 {
     delay_line_add(sample);
-    float Output = sample+delay_line_get(LFO(freq,480))*0.4+delay_line_get(LFO(freq+1,480))*0.4+delay_line_get(LFO(freq+2,480))*0.4+delay_line_get(LFO(freq+3,480))*0.4;
+    float Output = sample+delay_line_get(LFO(freq,480))*0.8+delay_line_get(LFO(freq+2,480))*0.7+delay_line_get(LFO(freq+4,480))*0.6+delay_line_get(LFO(freq+6,480))*0.5;
     return Output;
 }
 
@@ -202,11 +202,11 @@ float a0, a1, a2, b1, b2, hp_in_z1, hp_in_z2, hp_out_z1, hp_out_z2;
 
     float Do_HighPass (float inSample) {
 	//300Hz high-pass, 96k
-	a0 = 0.9862117951198142f;
-	a1 = -1.9724235902396283f;
-	a2 = 0.9862117951198142f;
-	b1 = -1.972233470205696f;
-	b2 = 0.9726137102735608f;
+	a0 =0.9850241702992f;
+	a1 = -1.970048340598f;
+	a2 = 0.9850241702992f;
+	b1 = -1.969824052547f;
+	b2 = 0.9702726286499f;
 
 	float inSampleF = (float)inSample;
 	float outSampleF =
@@ -270,5 +270,66 @@ float Do_PitchShift(float sum) {
 	return sum;
 
 
+}
+float Bass_a1,Bass_a2,Bass_a0,Bass_b0,Bass_b1,Bass_b2;
+float x[3]={0};
+float y[3] = {0};
+float Bass(float sample, float Gain)
+{
+    x[0] = sample;
+
+Bass_a0 = 0.0003460440697434;
+Bass_a1 =0.0006920881394868;
+Bass_a2=0.0003460440697434;
+Bass_b0 =1;
+Bass_b1=   -1.946697327641;
+Bass_b2=   0.9480815039196;
+y[0] = Bass_a0*x[0]+Bass_a1*x[1]+Bass_a2*x[2]-Bass_b1*y[1] - Bass_b2*y[2];
+x[1] = x[0];
+x[2] = x[1];
+y[1] = y[0];
+y[2] = y[1];
+
+return y[0]*Gain;
+}
+
+float Treble_a1,Treble_a2,Treble_a0,Treble_b0,Treble_b1,Treble_b2;
+float Treble(float sample,float Gain)
+{
+ x[0] = sample;
+
+Treble_a0 =0.07023598201045;
+Treble_a1 =0.0006920881394868;
+Treble_a2=-0.07023598201045;
+Treble_b0 =1;
+Treble_b1=   -1.81732290134;
+Treble_b2=   0.8595280359791;
+y[0] = Treble_a0*x[0]+Treble_a1*x[1]+Treble_a2*x[2]-Treble_b1*y[1] - Treble_b2*y[2];
+x[1] = x[0];
+x[2] = x[1];
+y[1] = y[0];
+y[2] = y[1];
+
+return y[0]*Gain;
+}
+
+float Mid_a1,Mid_a2,Mid_a0,Mid_b0,Mid_b1,Mid_b2;
+float Mid(float sample,float Gain)
+{
+ x[0] = sample;
+
+Mid_a0 = 0.05357633220485;
+Mid_a1 =0;
+Mid_a2=-0.05357633220485;
+Mid_b0 =1;
+Mid_b1=   -1.887463785371;
+Mid_b2=   0.8928473355903;
+y[0] = Mid_a0*x[0]+Mid_a1*x[1]+Mid_a2*x[2]-Mid_b1*y[1] - Mid_b2*y[2];
+x[1] = x[0];
+x[2] = x[1];
+y[1] = y[0];
+y[2] = y[1];
+
+return y[0]*Gain;
 }
 
