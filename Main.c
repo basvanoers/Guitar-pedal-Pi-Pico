@@ -17,7 +17,55 @@
 
 #include "PWM.pio.h"
 #include "I2S.pio.h"
+#include "pico/audio_i2s.h"
 
+
+#define SINE_WAVE_TABLE_LEN 2048
+#define SAMPLES_PER_BUFFER 1
+
+static int16_t sine_wave_table[SINE_WAVE_TABLE_LEN];
+
+
+struct audio_buffer_pool *init_audio() {
+
+    static audio_format_t audio_format = {
+            .format = AUDIO_BUFFER_FORMAT_PCM_S16,
+
+
+            .sample_freq = 48000,
+
+            .channel_count = 1,
+    };
+
+    static struct audio_buffer_format producer_format = {
+            .format = &audio_format,
+            .sample_stride = 2
+    };
+
+    struct audio_buffer_pool *producer_pool = audio_new_producer_pool(&producer_format, 3,
+                                                                      SAMPLES_PER_BUFFER); // todo correct size
+    bool __unused ok;
+    const struct audio_format *output_format;
+
+    struct audio_i2s_config config = {
+            .data_pin = PICO_AUDIO_I2S_DATA_PIN,
+            .clock_pin_base = PICO_AUDIO_I2S_CLOCK_PIN_BASE,
+            .dma_channel = 0,
+            .pio_sm = 0,
+    };
+
+    output_format = audio_i2s_setup(&audio_format, &config);
+    if (!output_format) {
+        panic("PicoAudio: Unable to open audio device.\n");
+    }
+
+    ok = audio_i2s_connect(producer_pool);
+    assert(ok);
+    audio_i2s_set_enabled(true);
+
+
+    return producer_pool;
+}
 
 
 #define Fs 48000
@@ -105,14 +153,13 @@ bool repeating_timer_callback(struct repeating_timer *t)
 {
     //dma_channel_wait_for_finish_blocking(DMA_channel);
     float sample = ADC_sample(); // get sample and put it in a variable
-    
- sample = sample/4096.0;
+    sample = sample/4096.0;
     sample -=0.5;
-                                              
-sample = Bass(sample,waardes.Bass)+Treble(sample,waardes.Treble)+Mid(sample,waardes.Mid);
-//get button input
+    sample = Gain(sample,6);
+    //sample = Treble(sample,1)+Mid(sample,1);
+    //get button input
+
     bool current_pin4_state = gpio_get(4);
-    
     if (current_pin4_state && !last_pin4_state) {
         setting = !setting;  // toggle the setting flag
     }
@@ -152,7 +199,7 @@ sample = Bass(sample,waardes.Bass)+Treble(sample,waardes.Treble)+Mid(sample,waar
 
 
 
-    if (true){
+    
     switch (current_effect)
     {
     //Gain
@@ -393,8 +440,6 @@ sample = Bass(sample,waardes.Bass)+Treble(sample,waardes.Treble)+Mid(sample,waar
     default:
         break;
     }
-}
-
     last_pin4_state = current_pin4_state;
  
     sample+=0.5;
@@ -419,31 +464,42 @@ void main(){
     
     RGB_led_init(13,10,15);
     effect_init(0);
-ADC_init(0,63); 
+    ADC_init(0,63); 
  
 
 
-    struct repeating_timer timer;
-    add_repeating_timer_us(12, repeating_timer_callback,NULL,&timer);
+   // struct repeating_timer timer;
+    //add_repeating_timer_us(12, repeating_timer_callback,NULL,&timer);
  
  aLastState = gpio_get(12);  
 // DMA_channel = 
+ for (int i = 0; i < SINE_WAVE_TABLE_LEN; i++) {
+        sine_wave_table[i] = 32767 * cosf(i * 2 * (float) (M_PI / SINE_WAVE_TABLE_LEN));
+    }
 
+    struct audio_buffer_pool *ap = init_audio();
+    uint32_t step = 0x200000;
+    uint32_t pos = 0;
+    uint32_t pos_max = 0x10000 * SINE_WAVE_TABLE_LEN;
+    uint vol = 128;
+    int i =0;
+    bool up= true;
+    while (true) {
+       
+        struct audio_buffer *buffer = take_audio_buffer(ap, true);
+        int16_t *samples = (int16_t *) buffer->buffer->bytes;
+        for (uint i = 0; i < buffer->max_sample_count; i++) {
+            samples[i] = (vol * sine_wave_table[pos >> 16u]) >> 8u;
+            pos += step;
+            if (pos >= pos_max) pos -= pos_max;
+        }
+
+       
+        buffer->sample_count = buffer->max_sample_count;
+        give_audio_buffer(ap, buffer);
+    }
 
  
-while (1) {
-
-    
-
-    tight_loop_contents();   
-    
-  
-
-   
- 
-
-  
- }
   
 }
 

@@ -19,6 +19,7 @@ set(sdkVersion 2.1.1)
 set(toolchainVersion 14_2_Rel1)
 set(picotoolVersion 2.1.1)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+set(PICO_EXTRAS_PATH "C:/Users/vanoe/OneDrive/Bureaublad/pico-extras")
 if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
@@ -27,7 +28,7 @@ set(PICO_BOARD pico2 CACHE STRING "Board type")
 
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
-
+include(pico_extras_import.cmake)
 
 project(Main C CXX ASM)
 
@@ -58,8 +59,20 @@ target_link_libraries(Main
         PWM
         ADC
         Effects
+        pico_audio_i2s
         )
 
+  target_compile_definitions(Main PRIVATE
+            # compile time configuration of I2S
+            PICO_AUDIO_I2S_MONO_INPUT=1
+            #define for our example code
+            USE_AUDIO_I2S=1
+#            PICO_AUDIO_I2S_DATA_PIN=22
+#            PICO_AUDIO_I2S_CLOCK_PIN_BASE=23
+#            PICO_DEFAULT_UART=0
+#            PICO_DEFAULT_UART_TX_PIN=28
+#            PICO_DEFAULT_UART_RX_PIN=29
+            )
 # Add the standard include files to the build
 target_include_directories(Main PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
